@@ -1,0 +1,34 @@
+{
+  "name": "studio",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:studio": "playwright test src/tests/studio.spec.ts",
+    "test:studio:ui": "playwright test src/tests/studio.spec.ts --ui",
+    "test:studio:headed": "playwright test src/tests/studio.spec.ts --headed",
+    "test:studio:debug": "playwright test src/tests/studio.spec.ts --debug",
+    "test:login": "playwright test src/tests/studio.spec.ts",
+    "test:login:ui": "playwright test src/tests/studio.spec.ts --ui",
+    "test:login:headed": "playwright test src/tests/studio.spec.ts --headed",
+    "test:login:debug": "playwright test src/tests/studio.spec.ts --debug",
+    "test:settings": "playwright test src/tests/settings.spec.ts",
+    "test:settings:ui": "playwright test src/tests/settings.spec.ts --ui",
+    "test:settings:headed": "playwright test src/tests/settings.spec.ts --headed",
+    "test:settings:debug": "playwright test src/tests/settings.spec.ts --debug",
+    "report": "playwright show-report",
+    "codegen": "playwright codegen https://studio.alfa.envs.veritran.com/"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.58.0",
+    "@types/node": "^25.0.10"
+  }
+}
