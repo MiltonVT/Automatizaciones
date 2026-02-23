@@ -38,8 +38,8 @@ export class StudioPage extends BasePage {
     const currentUrl = await this.getCurrentUrl();
     console.log(`Current URL: ${currentUrl}`);
     
-    // Validar que la URL cambió a studio.alfa
-    await expect(this.page).toHaveURL(/.*studio\.alfa.*/);
+    // Validar que la URL contiene studio y veritran (funciona con cualquier ambiente)
+    await expect(this.page).toHaveURL(/.*studio\..*\.envs\.veritran\.com.*/);
     
     // Intentar esperar el elemento, pero si no aparece validamos solo por URL
     const isElementVisible = await this.isElementVisible(this.STUDIO_MENU_NAME);
@@ -68,6 +68,37 @@ export class StudioPage extends BasePage {
   }
 
   /**
+   * Select branch from the Dashboard based on BRANCH environment variable
+   */
+  async selectBranch(): Promise<void> {
+    try {
+      const branchName = APPLICATION.BRANCH;
+      console.log(`🔍 Looking for branch: ${branchName}`);
+      
+      // Use the provided locator structure to find and click the branch
+      const branchElement = this.page
+        .locator('iframe[title="Studio container"]')
+        .contentFrame()
+        .locator('iframe[title="Dashboard"]')
+        .contentFrame()
+        .getByText(branchName);
+      
+      // Wait for branch element to be visible
+      await branchElement.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
+      
+      // Click on the branch
+      await branchElement.click();
+      console.log(`✅ Selected branch: ${branchName}`);
+      
+      // Wait a moment for the branch to load
+      await this.page.waitForTimeout(TIMEOUTS.SHORT_WAIT);
+    } catch (error) {
+      console.log(`⚠️ Could not select branch: ${APPLICATION.BRANCH}`);
+      console.log('Continuing with current branch...');
+    }
+  }
+
+  /**
    * Click on application card based on APP_NAME environment variable
    */
   async openApplication(): Promise<void> {
@@ -91,7 +122,18 @@ export class StudioPage extends BasePage {
     
     // Don't wait for networkidle - the element validation in verifyApplicationTitle() 
     // will confirm the app actually loaded by checking the Overview iframe
-  } with branch
+  }
+
+  /**
+   * Click on ALPHA_EASY_VT_SERVICESS application card (Legacy - use openApplication instead)
+   * @deprecated Use openApplication() instead
+   */
+  async openAlphaEasyVTServicesApp(): Promise<void> {
+    await this.openApplication();
+  }
+
+  /**
+   * Verify application title is displayed with branch
    */
   async verifyApplicationTitle(): Promise<void> {
     try {
@@ -107,18 +149,7 @@ export class StudioPage extends BasePage {
         .getByText(expectedTitle);
       
       await appTitle.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
-      console.log(`✅ Application title verified: ${expectedTitle}`
-  async verifyApplicationTitle(): Promise<void> {
-    try {
-      const appTitle = this.page
-        .locator('iframe[title="Studio container"]')
-        .contentFrame()
-        .locator('iframe[title="Overview"]')
-        .contentFrame()
-        .getByText('ALPHA_EASY_VT_SERVICESS | main');
-      
-      await appTitle.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
-      console.log('✅ Application title verified: ALPHA_EASY_VT_SERVICESS | main');
+      console.log(`✅ Application title verified: ${expectedTitle}`);
     } catch (error) {
       console.log('⚠️ Could not verify application title');
       throw error;
@@ -139,12 +170,13 @@ export class StudioPage extends BasePage {
       console.log(`⚠️ Application load verified: ${url}`);
     }
   }
-Flow(): Promise<void> {
-    await this.openApplication
-   * Complete flow: Open application after login
+
+  /**
+   * Complete flow: Open application after login and select branch
    */
-  async openApplication(): Promise<void> {
-    await this.openAlphaEasyVTServicesApp();
+  async openApplicationFlow(): Promise<void> {
+    await this.openApplication();
+    await this.selectBranch();
     await this.verifyApplicationOpened();
     await this.verifyApplicationTitle();
   }
