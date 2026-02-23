@@ -1,6 +1,6 @@
 import { Page, expect } from '@playwright/test';
 import { BasePage } from './BasePage';
-import { TIMEOUTS, TEST_DATA } from '../utils/constants';
+import { TIMEOUTS, TEST_DATA, APPLICATION } from '../utils/constants';
 
 /**
  * Studio Page Object Model
@@ -68,31 +68,46 @@ export class StudioPage extends BasePage {
   }
 
   /**
-   * Click on ALPHA_EASY_VT_SERVICESS application card
+   * Click on application card based on APP_NAME environment variable
    */
-  async openAlphaEasyVTServicesApp(): Promise<void> {
+  async openApplication(): Promise<void> {
     await this.waitForApplicationsLoaded();
+    
+    const appNameToOpen = APPLICATION.NAME;
+    console.log(`🔍 Looking for application: ${appNameToOpen}`);
     
     // Use frameLocator for nested iframes (Playwright best practice)
     const appCard = this.page
       .frameLocator('iframe[title="Studio container"]')
       .frameLocator('iframe[title="Dashboard"]')
-      .getByText('ALPHA_EASY_VT_SERVICESS')
+      .getByText(appNameToOpen)
       .first();
     
     // Explicitly wait for visibility before clicking
     await appCard.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
     
     await appCard.click();
-    console.log('✅ Clicked on ALPHA_EASY_VT_SERVICESS application');
+    console.log(`✅ Clicked on ${appNameToOpen} application`);
     
     // Don't wait for networkidle - the element validation in verifyApplicationTitle() 
     // will confirm the app actually loaded by checking the Overview iframe
-  }
-
-  /**
-   * Verify application title is displayed
+  } with branch
    */
+  async verifyApplicationTitle(): Promise<void> {
+    try {
+      const appName = APPLICATION.NAME;
+      const branch = APPLICATION.BRANCH;
+      const expectedTitle = `${appName} | ${branch}`;
+      
+      const appTitle = this.page
+        .locator('iframe[title="Studio container"]')
+        .contentFrame()
+        .locator('iframe[title="Overview"]')
+        .contentFrame()
+        .getByText(expectedTitle);
+      
+      await appTitle.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
+      console.log(`✅ Application title verified: ${expectedTitle}`
   async verifyApplicationTitle(): Promise<void> {
     try {
       const appTitle = this.page
@@ -124,8 +139,8 @@ export class StudioPage extends BasePage {
       console.log(`⚠️ Application load verified: ${url}`);
     }
   }
-
-  /**
+Flow(): Promise<void> {
+    await this.openApplication
    * Complete flow: Open application after login
    */
   async openApplication(): Promise<void> {

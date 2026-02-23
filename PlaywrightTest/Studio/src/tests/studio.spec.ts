@@ -28,8 +28,8 @@ test('Login to STUDIO ALFA and open ALPHA_EASY_VT_SERVICESS application', async 
   // Tomar screenshot antes de abrir la aplicación
   await studioPage.takeStudioScreenshot('studio-dashboard.png');
 
-  // 6. Abrir la aplicación ALPHA_EASY_VT_SERVICESS
-  await studioPage.openApplication();
+  // 6. Abrir la aplicación (basado en APP_NAME env variable)
+  await studioPage.openApplicationFlow();
 
   // 7. Tomar screenshot de la aplicación abierta
   await studioPage.takeStudioScreenshot('application-opened.png');
@@ -42,7 +42,7 @@ test.describe('Application Settings Tests', () => {
     await loginPage.goto(URLS.STUDIO_ALFA);
     await loginPage.login(CREDENTIALS.USERNAME, CREDENTIALS.PASSWORD);
     await studioPage.verifyLoginSuccess();
-    await studioPage.openApplication();
+    await studioPage.openApplicationFlow();
     await studioPage.takeStudioScreenshot('application-opened.png');
   });
 
