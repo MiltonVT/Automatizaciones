@@ -57,7 +57,13 @@ test('Publish application after opening', async ({ page, loginPage, studioPage }
   // 7. Esperar que termine la publicación
   await studioPage.waitForPublicationComplete();
 
-  // 8. Tomar screenshot después de publicar
+  // 8. Confirmar la publicación haciendo click en "Confirm"
+  await studioPage.confirmPublish();
+
+  // 9. Validar que la publicación fue exitosa
+  await studioPage.verifyPublicationSuccess();
+
+  // 10. Tomar screenshot después de publicar
   await studioPage.takeStudioScreenshot('application-after-publish.png');
 
   console.log('✅ Application publication test completed successfully');

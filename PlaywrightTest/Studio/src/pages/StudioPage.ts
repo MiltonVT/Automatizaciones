@@ -240,6 +240,55 @@ export class StudioPage extends BasePage {
   }
 
   /**
+   * Click the "Confirm" button in the "Generate and publish" modal dialog
+   */
+  async confirmPublish(): Promise<void> {
+    try {
+      const confirmButton = this.page
+        .locator('iframe[title="Studio container"]')
+        .contentFrame()
+        .locator('iframe[title="Generate and publish"]')
+        .contentFrame()
+        .getByRole('button', { name: 'Confirm' });
+      
+      // Wait for confirm button to be visible
+      await confirmButton.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
+      
+      // Click the confirm button
+      await confirmButton.click();
+      console.log('✅ Clicked "Confirm" button in publish dialog');
+      
+      // Wait a moment for the confirmation to be processed
+      await this.page.waitForTimeout(TIMEOUTS.SHORT_WAIT);
+    } catch (error) {
+      console.log('⚠️ Could not click confirm button in publish dialog');
+      throw error;
+    }
+  }
+
+  /**
+   * Verify that the application was successfully published
+   * Looks for the "App successfully published." message
+   */
+  async verifyPublicationSuccess(): Promise<void> {
+    try {
+      const successMessage = this.page
+        .locator('iframe[title="Studio container"]')
+        .contentFrame()
+        .locator('iframe[title="Generate and publish"]')
+        .contentFrame()
+        .getByText('App successfully published.');
+      
+      // Wait for the success message to be visible
+      await successMessage.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
+      console.log('✅ Publication success message verified: "App successfully published."');
+    } catch (error) {
+      console.log('⚠️ Could not verify publication success message');
+      throw error;
+    }
+  }
+
+  /**
    * Complete flow: Publish application after opening it
    */
   async publishApplicationFlow(): Promise<void> {
