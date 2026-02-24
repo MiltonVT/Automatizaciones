@@ -6,7 +6,7 @@
  * Example: node scripts/runTestWithReports.js studio publish --headed
  */
 
-const { spawn } = require('child_process');
+const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const { getReportPath, ensureReportsArchiveDir } = require('./generateReportName');
@@ -26,7 +26,7 @@ function runTest(testFile, testName, additionalArgs = []) {
   console.log(`⏱️  Timestamp: ${new Date().toISOString()}`);
   console.log(`🧪 Test: ${testName || 'all tests'}`);
   console.log(`📄 File: ${testFile}`);
-  console.log('---');
+  console.log('---\n');
   
   // Build playwright command
   const testSpec = testFile.includes('.spec.ts') 
@@ -36,7 +36,7 @@ function runTest(testFile, testName, additionalArgs = []) {
   const playwrightArgs = [
     'test',
     testSpec,
-    '--reporter=html=' + htmlReportDir,
+    `--reporter=html=${htmlReportDir}`,
     ...additionalArgs,
   ];
   
@@ -45,34 +45,24 @@ function runTest(testFile, testName, additionalArgs = []) {
     playwrightArgs.push('--grep', testName);
   }
   
-  console.log(`🚀 Running: npx playwright ${playwrightArgs.join(' ')}\n`);
+  const command = `npx ${playwrightArgs.join(' ')}`;
+  console.log(`🚀 Running: ${command}\n`);
   
-  // Spawn the test process
-  const testProcess = spawn('npx', playwrightArgs, {
-    stdio: 'inherit',
-    cwd: __dirname + '/..'
-  });
-  
-  testProcess.on('exit', (code) => {
-    if (code === 0) {
-      console.log(`\n✅ Tests completed successfully!`);
-      console.log(`📁 Results saved in: ${reportPath}`);
-      console.log(`📊 View report: ${path.join(htmlReportDir, 'index.html')}`);
-    } else {
-      console.log(`\n❌ Tests failed with exit code: ${code}`);
-      console.log(`📁 Results saved in: ${reportPath}`);
-    }
-  });
-  
-  testProcess.on('error', (err) => {
-    console.error(`❌ Failed to start test process: ${err}`);
+  try {
+    // Execute the test command
+    execSync(command, {
+      stdio: 'inherit',
+      cwd: path.join(__dirname, '..')
+    });
+    
+    console.log(`\n✅ Tests completed successfully!`);
+    console.log(`📁 Results saved in: ${reportPath}`);
+    console.log(`📊 View report: ${path.join(htmlReportDir, 'index.html')}`);
+    process.exit(0);
+  } catch (err) {
+    console.log(`\n❌ Tests failed or ended with error`);
+    console.log(`📁 Results saved in: ${reportPath}`);
     process.exit(1);
-  });
+  }
 }
 
-// Parse command line arguments
-const testFile = process.argv[2] || 'studio';
-const testName = process.argv[3] || 'all';
-const additionalArgs = process.argv.slice(4);
-
-runTest(testFile, testName, additionalArgs);
