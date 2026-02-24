@@ -21,7 +21,17 @@
     "test:settings:headed": "playwright test src/tests/settings.spec.ts --headed",
     "test:settings:debug": "playwright test src/tests/settings.spec.ts --debug",
     "report": "playwright show-report",
-    "codegen": "playwright codegen https://studio.alfa.envs.veritran.com/"
+    "codegen": "playwright codegen https://studio.alfa.envs.veritran.com/",
+    "test:with-report": "node scripts/runTestWithReports.js",
+    "test:studio:report": "node scripts/runTestWithReports.js studio",
+    "test:studio:report:headed": "node scripts/runTestWithReports.js studio all --headed",
+    "test:settings:report": "node scripts/runTestWithReports.js settings",
+    "test:settings:report:headed": "node scripts/runTestWithReports.js settings all --headed",
+    "test:publish": "node scripts/runTestWithReports.js studio publish --headed",
+    "test:login-simple": "node scripts/runTestWithReports.js studio 'Login to STUDIO ALFA - POM' --headed",
+    "test:open-app": "node scripts/runTestWithReports.js studio 'open.*application' --headed",
+    "reports:list": "node scripts/listReports.js",
+    "reports:clean": "node scripts/cleanOldReports.js"
   },
   "keywords": [],
   "author": "",
