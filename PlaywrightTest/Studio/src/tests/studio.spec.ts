@@ -35,6 +35,34 @@ test('Login to STUDIO ALFA and open ALPHA_EASY_VT_SERVICESS application', async 
   await studioPage.takeStudioScreenshot('application-opened.png');
 });
 
+test('Publish application after opening', async ({ page, loginPage, studioPage }) => {
+  // 1. Navegar a la URL de Studio
+  await loginPage.goto(URLS.STUDIO_ALFA);
+
+  // 2. Realizar login
+  await loginPage.login(CREDENTIALS.USERNAME, CREDENTIALS.PASSWORD);
+
+  // 3. Validar que el login fue exitoso
+  await studioPage.verifyLoginSuccess();
+
+  // 4. Abrir la aplicación (respeta APP_NAME y BRANCH env variables)
+  await studioPage.openApplicationFlow();
+
+  // 5. Tomar screenshot antes de publicar
+  await studioPage.takeStudioScreenshot('application-before-publish.png');
+
+  // 6. Hacer click en el botón "Generate and publish"
+  await studioPage.clickPublishButton();
+
+  // 7. Esperar que termine la publicación
+  await studioPage.waitForPublicationComplete();
+
+  // 8. Tomar screenshot después de publicar
+  await studioPage.takeStudioScreenshot('application-after-publish.png');
+
+  console.log('✅ Application publication test completed successfully');
+});
+
 // Base de Tests: Login + Abrir Aplicación
 test.describe('Application Settings Tests', () => {
   test.beforeEach(async ({ page, loginPage, studioPage }) => {

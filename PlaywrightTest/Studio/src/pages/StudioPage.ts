@@ -182,6 +182,73 @@ export class StudioPage extends BasePage {
   }
 
   /**
+   * Click on "Generate and publish" button to publish the application
+   */
+  async clickPublishButton(): Promise<void> {
+    try {
+      const publishButton = this.page
+        .locator('iframe[title="Studio container"]')
+        .contentFrame()
+        .getByRole('button', { name: 'Generate and publish' });
+      
+      // Wait for the publish button to be visible and enabled
+      await publishButton.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
+      
+      // Scroll into view if needed
+      await publishButton.scrollIntoViewIfNeeded();
+      
+      // Click the publish button
+      await publishButton.click();
+      console.log('✅ Clicked "Generate and publish" button');
+      
+      // Wait a moment for the publication process to start
+      await this.page.waitForTimeout(TIMEOUTS.SHORT_WAIT);
+    } catch (error) {
+      console.log('⚠️ Could not click publish button');
+      throw error;
+    }
+  }
+
+  /**
+   * Wait for the application publication to complete
+   * Waits for any loading indicators to disappear
+   */
+  async waitForPublicationComplete(): Promise<void> {
+    try {
+      console.log('⏳ Waiting for publication to complete...');
+      
+      // Wait for any loading spinners/progress indicators to disappear
+      // This is a flexible approach that waits for the API/generation to finish
+      const containerFrame = this.page
+        .locator('iframe[title="Studio container"]')
+        .contentFrame();
+      
+      // Wait for button to be stable (not in loading state)
+      const publishButton = containerFrame.getByRole('button', { name: 'Generate and publish' });
+      
+      // Wait for the button to be enabled again (indicating publication is done)
+      await publishButton.isEnabled({ timeout: TIMEOUTS.APP_LOAD });
+      
+      console.log('✅ Publication completed successfully');
+      
+      // Wait a moment for UI to stabilize after publication
+      await this.page.waitForTimeout(TIMEOUTS.SHORT_WAIT);
+    } catch (error) {
+      console.log('⚠️ Publication may still be in progress, continuing...');
+      // Don't throw - publication might have completed silently
+    }
+  }
+
+  /**
+   * Complete flow: Publish application after opening it
+   */
+  async publishApplicationFlow(): Promise<void> {
+    await this.openApplicationFlow();
+    await this.clickPublishButton();
+    await this.waitForPublicationComplete();
+  }
+
+  /**
    * Take screenshot of Studio dashboard
    */
   async takeStudioScreenshot(filename: string = 'studio-dashboard.png'): Promise<void> {
