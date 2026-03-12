@@ -5,9 +5,11 @@ import { Page } from '@playwright/test';
  */
 export class BasePage {
   protected page: Page;
+  private screenshotCounter: number = 0;
 
   constructor(page: Page) {
     this.page = page;
+    this.screenshotCounter = 0;
   }
 
   /**
@@ -60,9 +62,17 @@ export class BasePage {
   }
 
   /**
-   * Take screenshot
+   * Take screenshot with automatic numbering to prevent overwriting
    */
   async takeScreenshot(filename: string): Promise<void> {
-    await this.page.screenshot({ path: filename });
+    this.screenshotCounter++;
+    // Inyectar el número del contador en el nombre del archivo
+    // "screenshot-name.png" -> "screenshot-name-1.png"
+    const parts = filename.split('.');
+    const ext = parts.pop(); // Get extension
+    const nameWithoutExt = parts.join('.');
+    const numberedFilename = `${nameWithoutExt}-${this.screenshotCounter}.${ext}`;
+    
+    await this.page.screenshot({ path: numberedFilename });
   }
 }

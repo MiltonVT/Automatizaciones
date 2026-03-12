@@ -69,6 +69,106 @@ test('Publish application after opening', async ({ page, loginPage, studioPage }
   console.log('✅ Application publication test completed successfully');
 });
 
+test('Validar visualizacion de Screen', async ({ page, loginPage, studioPage }) => {
+  // 1. Navegar a la URL de Studio
+  await loginPage.goto(URLS.STUDIO_ALFA);
+
+  // 2. Realizar login
+  await loginPage.login(CREDENTIALS.USERNAME, CREDENTIALS.PASSWORD);
+
+  // 3. Validar que el login fue exitoso
+  await studioPage.verifyLoginSuccess();
+
+  // 4. Abrir la aplicación (respeta APP_NAME y BRANCH env variables)
+  await studioPage.openApplicationFlow();
+
+  // 5. Tomar screenshot de la aplicación abierta
+  await studioPage.takeStudioScreenshot('screen-view-before.png');
+
+  // 6. Ejecutar el flujo de visualización de pantallas
+  await studioPage.viewScreenFlow('S001');
+
+  // 7. Tomar screenshot después de ver la pantalla
+  await studioPage.takeStudioScreenshot('screen-view-after.png');
+
+  console.log('✅ Screen visualization test completed successfully');
+});
+
+test('Validar busquedas Appflow', async ({ page, loginPage, studioPage }) => {
+  // 1. Navegar a la URL de Studio
+  await loginPage.goto(URLS.STUDIO_ALFA);
+
+  // 2. Realizar login
+  await loginPage.login(CREDENTIALS.USERNAME, CREDENTIALS.PASSWORD);
+
+  // 3. Validar que el login fue exitoso
+  await studioPage.verifyLoginSuccess();
+
+  // 4. Abrir la aplicación (respeta APP_NAME y BRANCH env variables)
+  await studioPage.openApplicationFlow();
+
+  // 5. Tomar screenshot de la aplicación abierta
+  await studioPage.takeStudioScreenshot('appflow-before.png');
+
+  // 6. Ejecutar el flujo de búsquedas en AppFlow
+  await studioPage.validateAppFlowSearches('S001', 'P_TPL_INITIAL');
+
+  // 7. Tomar screenshot después de las búsquedas
+  await studioPage.takeStudioScreenshot('appflow-after.png');
+
+  console.log('✅ AppFlow search validation test completed successfully');
+});
+
+test('Validar dependencias', async ({ page, loginPage, studioPage }) => {
+  // 1. Navegar a la URL de Studio
+  await loginPage.goto(URLS.STUDIO_ALFA);
+
+  // 2. Realizar login
+  await loginPage.login(CREDENTIALS.USERNAME, CREDENTIALS.PASSWORD);
+
+  // 3. Validar que el login fue exitoso
+  await studioPage.verifyLoginSuccess();
+
+  // 4. Abrir la aplicación (respeta APP_NAME y BRANCH env variables)
+  await studioPage.openApplicationFlow();
+
+  // 5. Tomar screenshot de la aplicación abierta
+  await studioPage.takeStudioScreenshot('dependencies-before.png');
+
+  // 6. Ejecutar el flujo de validación de dependencias
+  await studioPage.validateDependenciesFlow();
+
+  // 7. Tomar screenshot después de validar dependencias
+  await studioPage.takeStudioScreenshot('dependencies-after.png');
+
+  console.log('✅ Dependencies validation test completed successfully');
+});
+
+test('Validar Listado de Procesos', async ({ page, loginPage, studioPage }) => {
+  // 1. Navegar a la URL de Studio
+  await loginPage.goto(URLS.STUDIO_ALFA);
+
+  // 2. Realizar login
+  await loginPage.login(CREDENTIALS.USERNAME, CREDENTIALS.PASSWORD);
+
+  // 3. Validar que el login fue exitoso
+  await studioPage.verifyLoginSuccess();
+
+  // 4. Abrir la aplicación (respeta APP_NAME y BRANCH env variables)
+  await studioPage.openApplicationFlow();
+
+  // 5. Tomar screenshot de la aplicación abierta
+  await studioPage.takeStudioScreenshot('process-list-01-before.png');
+
+  // 6. Ejecutar el flujo de validación de listado de procesos
+  await studioPage.validateProcessListFlow('card');
+
+  // 7. Tomar screenshot después de validar procesos
+  await studioPage.takeStudioScreenshot('process-list-04-after.png');
+
+  console.log('✅ Process list validation test completed successfully');
+});
+
 // Base de Tests: Login + Abrir Aplicación
 test.describe('Application Settings Tests', () => {
   test.beforeEach(async ({ page, loginPage, studioPage }) => {
