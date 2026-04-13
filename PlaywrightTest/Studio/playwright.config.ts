@@ -29,15 +29,11 @@ export default defineConfig({
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    headless: false,
-    /* Base URL to use in actions like `await page.goto('')`. */
-    // baseURL: 'http://localhost:3000',
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    headless: !!process.env.CI,
+    baseURL: process.env.STUDIO_URL || 'https://studio.alfa.envs.veritran.com/',
     trace: 'on-first-retry',
-    
-    /* Capture screenshot for each test */
     screenshot: 'on',
+    video: 'retain-on-failure',
   },
 
   /* Configure projects for major browsers */

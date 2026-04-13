@@ -1,78 +1,27 @@
 import { Page } from '@playwright/test';
 
 /**
- * Base Page class with common methods
+ * Base Page — thin wrapper around Playwright Page.
+ *
+ * Provides ONLY cross-cutting helpers that every page legitimately needs.
+ * Domain logic, selectors, and assertions do NOT belong here.
  */
 export class BasePage {
-  protected page: Page;
-  private screenshotCounter: number = 0;
+  protected readonly page: Page;
 
   constructor(page: Page) {
     this.page = page;
-    this.screenshotCounter = 0;
   }
 
-  /**
-   * Navigate to a URL
-   */
   async goto(url: string): Promise<void> {
     await this.page.goto(url);
   }
 
-  /**
-   * Fill an input field
-   */
-  async fillInput(selector: string, value: string): Promise<void> {
-    await this.page.fill(selector, value);
-  }
-
-  /**
-   * Click an element
-   */
-  async click(selector: string): Promise<void> {
-    await this.page.click(selector);
-  }
-
-  /**
-   * Wait for navigation with timeout
-   */
-  async waitForNavigation(timeout: number): Promise<void> {
-    await this.page.waitForNavigation({ timeout });
-  }
-
-  /**
-   * Get current URL
-   */
-  async getCurrentUrl(): Promise<string> {
+  async getCurrentUrl(): string {
     return this.page.url();
   }
 
-  /**
-   * Wait for element to be visible
-   */
-  async waitForElement(selector: string, timeout: number): Promise<void> {
-    await this.page.locator(selector).waitFor({ timeout });
-  }
-
-  /**
-   * Check if element is visible
-   */
-  async isElementVisible(selector: string): Promise<boolean> {
-    return await this.page.locator(selector).isVisible().catch(() => false);
-  }
-
-  /**
-   * Take screenshot with automatic numbering to prevent overwriting
-   */
   async takeScreenshot(filename: string): Promise<void> {
-    this.screenshotCounter++;
-    // Inyectar el número del contador en el nombre del archivo
-    // "screenshot-name.png" -> "screenshot-name-1.png"
-    const parts = filename.split('.');
-    const ext = parts.pop(); // Get extension
-    const nameWithoutExt = parts.join('.');
-    const numberedFilename = `${nameWithoutExt}-${this.screenshotCounter}.${ext}`;
-    
-    await this.page.screenshot({ path: numberedFilename });
+    await this.page.screenshot({ path: filename });
   }
 }

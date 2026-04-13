@@ -1,54 +1,55 @@
-import { Page, expect, FrameLocator } from '@playwright/test';
+import { Page } from '@playwright/test';
 import { BasePage } from './BasePage';
+import { StudioContainerComponent } from '../components/StudioContainerComponent';
+import { TransactionsComponent } from '../components/TransactionsComponent';
+import { IFRAMES } from '../selectors/selectors';
+import { TEST_IDS } from '../selectors/selectors';
+import { TIMEOUTS } from '../utils/constants';
+import { Logger } from '../utils/logger';
 
 /**
- * Transactions Page Object Model
+ * Transactions Page - handles popup-based transaction workflow.
+ * Uses CPOM components for iframe access.
  */
 export class TransactionsPage extends BasePage {
-  // Selectors
-  private readonly OVERVIEW_IFRAME = 'iframe[title="Overview"]';
-  private readonly STUDIO_CONTAINER_IFRAME = 'iframe[title="Studio container"]';
-  private readonly TRANSACTIONS_BUTTON = 'button:has-text("Transactions")';
-  private readonly TRANSACTIONS_IFRAME = 'iframe[title="Transactions"]';
-  private readonly SEARCH_INPUT = 'input[role="textbox"][name="Search"], input[aria-label="Search"]';
-  private readonly EDIT_BUTTON = 'button:has-text("Edit")';
-  private readonly ES_MAYOR_MENOR_IFRAME = 'iframe[title="EsMayorMenor(AMenorQueB)"]';
-  private readonly SETTING_NAME = '[data-testid="setting_name"]';
+  private readonly container: StudioContainerComponent;
 
   constructor(page: Page) {
     super(page);
+    this.container = new StudioContainerComponent(page);
   }
 
-  /**
-   * Navega a la sección de transacciones (abre popup)
-   */
+  /** Open the Transactions popup via the Overview iframe */
   async openTransactionsPopup(): Promise<Page> {
-    const studioFrame = await this.page.frameLocator(this.STUDIO_CONTAINER_IFRAME);
-    const overviewFrame = studioFrame.frameLocator(this.OVERVIEW_IFRAME);
+    Logger.action('Click', 'Transactions', 'Opening transactions popup');
+    const overviewButton = this.container.overview.getButton('Transactions');
     const [popup] = await Promise.all([
       this.page.waitForEvent('popup'),
-      overviewFrame.locator(this.TRANSACTIONS_BUTTON).click()
+      overviewButton.click(),
     ]);
+    Logger.success('Click', 'Transactions', 'Popup opened');
     return popup;
   }
 
-  /**
-   * Realiza búsqueda y edición en transacciones
-   */
+  /** Search and edit a transaction in the popup window */
   async searchAndEditTransaction(popup: Page, searchText: string): Promise<void> {
-    const studioFrame = popup.frameLocator(this.STUDIO_CONTAINER_IFRAME);
-    const transactionsFrame = studioFrame.frameLocator(this.TRANSACTIONS_IFRAME);
-    await transactionsFrame.getByRole('textbox', { name: 'Search' }).click();
-    await transactionsFrame.getByRole('textbox', { name: 'Search' }).fill(searchText);
-    await transactionsFrame.getByRole('button', { name: 'Edit' }).click();
+    Logger.action('Search', 'Transactions', `Searching: ${searchText}`);
+    const popupContainer = new StudioContainerComponent(popup);
+    const txFrame = popupContainer.getFrame(IFRAMES.TRANSACTIONS);
+    const txComponent = new TransactionsComponent(txFrame);
+
+    await txComponent.searchBox.click();
+    await txComponent.searchBox.fill(searchText);
+    await txComponent.editButton.click();
+    Logger.success('Click', 'Transactions', `Edited transaction: ${searchText}`);
   }
 
-  /**
-   * Interactúa con el iframe EsMayorMenor
-   */
+  /** Interact with the EsMayorMenor iframe inside the popup */
   async interactWithEsMayorMenor(popup: Page): Promise<void> {
-    const studioFrame = popup.frameLocator(this.STUDIO_CONTAINER_IFRAME);
-    const esMayorMenorFrame = studioFrame.frameLocator(this.ES_MAYOR_MENOR_IFRAME);
-    await esMayorMenorFrame.getByTestId('setting_name').click();
+    Logger.action('Click', 'Transactions', 'Interacting with EsMayorMenor');
+    const popupContainer = new StudioContainerComponent(popup);
+    const esMayorFrame = popupContainer.getFrame('iframe[title="EsMayorMenor(AMenorQueB)"]');
+    await esMayorFrame.getByTestId(TEST_IDS.SETTING_NAME).click();
+    Logger.success('Click', 'Transactions', 'Clicked setting_name in EsMayorMenor');
   }
 }

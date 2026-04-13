@@ -1,37 +1,52 @@
 /**
- * Constants used across the test suite
+ * Environment-driven constants for the test suite.
+ *
+ * All sensitive values are loaded from environment variables (.env).
+ * Fallback defaults are ONLY for non-sensitive config.
+ * Credentials MUST be set via .env — missing values throw at import time.
  */
+import dotenv from 'dotenv';
+import path from 'path';
 
-// Load environment variables
-const STUDIO_URL = process.env.STUDIO_URL || 'https://studio.alfa.envs.veritran.com/';
-const USERNAME = process.env.USERNAME || 'marias';
-const PASSWORD = process.env.PASSWORD || 'V3r1tr4n';
-const APP_NAME = process.env.APP_NAME || 'ALPHA_EASY_VT_SERVICESS';
-const BRANCH = process.env.BRANCH || 'main';
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
+// ── Helpers ──────────────────────────────────────────────────────────
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}. Set it in your .env file.`);
+  }
+  return value;
+}
+
+// ── URLs ─────────────────────────────────────────────────────────────
 export const URLS = {
-  STUDIO_ALFA: STUDIO_URL,
-};
+  STUDIO_ALFA: process.env.STUDIO_URL || 'https://studio.alfa.envs.veritran.com/',
+} as const;
 
+// ── Credentials (required from .env) ─────────────────────────────────
 export const CREDENTIALS = {
-  USERNAME,
-  PASSWORD,
-};
+  USERNAME: requireEnv('STUDIO_USERNAME'),
+  PASSWORD: requireEnv('STUDIO_PASSWORD'),
+} as const;
 
+// ── Application config ───────────────────────────────────────────────
 export const APPLICATION = {
-  NAME: APP_NAME,
-  BRANCH: BRANCH,
-};
+  NAME: process.env.APP_NAME || 'ALPHA_EASY_VT_SERVICESS',
+  BRANCH: process.env.BRANCH || 'main',
+} as const;
 
+// ── Timeouts (ms) ────────────────────────────────────────────────────
 export const TIMEOUTS = {
-  NAVIGATION: 180000,
-  ELEMENT_WAIT: 60000,
-  APP_LOAD: 120000,
-  MEDIUM_WAIT: 15000,
-  LONG_WAIT: 30000,
-  SHORT_WAIT: 5000,
-};
+  NAVIGATION: 180_000,
+  ELEMENT_WAIT: 60_000,
+  APP_LOAD: 120_000,
+  MEDIUM_WAIT: 15_000,
+  LONG_WAIT: 30_000,
+  SHORT_WAIT: 5_000,
+} as const;
 
+// ── Static test data ─────────────────────────────────────────────────
 export const TEST_DATA = {
   EXPECTED_TITLE: 'Studio',
-};
+} as const;
