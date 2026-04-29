@@ -1,6 +1,14 @@
 import { Page } from '@playwright/test';
 import { BasePage } from './BasePage';
 import { StudioContainerComponent } from '../components/StudioContainerComponent';
+import { PublishComponent } from '../components/PublishComponent';
+import { ScreensComponent } from '../components/ScreensComponent';
+import { UnnamedComponent } from '../components/UnnamedComponent';
+import { AppFlowComponent } from '../components/AppFlowComponent';
+import { DependenciesComponent } from '../components/DependenciesComponent';
+import { ProcessesComponent } from '../components/ProcessesComponent';
+import { CreateBranchComponent, BranchConfig } from '../components/CreateBranchComponent';
+import { LocalVariablesComponent, LocalVariableData } from '../components/LocalVariablesComponent';
 import { IFRAMES } from '../selectors/selectors';
 import { STUDIO } from '../selectors/selectors';
 import { TIMEOUTS, APPLICATION } from '../utils/constants';
@@ -89,6 +97,101 @@ export class StudioPage extends BasePage {
     await this.verifyApplicationTitle();
   }
 
+  // -- Create Branch --------------------------------------------------
+
+  /** Open the Create Branch modal via Menu button */
+  async openCreateBranchModal(): Promise<void> {
+    Logger.action('Click', 'Menu', 'Opening menu');
+    const menuBtn = this.container.frame.getByRole('button', { name: 'Menu' });
+    await menuBtn.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
+    await menuBtn.click();
+
+    Logger.action('Click', 'Create Branch', 'Opening Create branch modal');
+    const createBtn = this.container.frame.getByRole('button', { name: 'Create branch', exact: true });
+    await createBtn.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
+    await createBtn.click();
+    Logger.success('Click', 'Create Branch', 'Modal opened');
+  }
+
+  /** Create a new branch and navigate to it */
+  async createBranchAndNavigate(config: BranchConfig): Promise<void> {
+    await this.openCreateBranchModal();
+
+    const branchFrame = this.container.getFrame(IFRAMES.CREATE_BRANCH);
+    const branchComponent = new CreateBranchComponent(branchFrame);
+    await branchComponent.createBranch(config);
+
+    Logger.action('Click', 'Create Branch', 'Navigating to new branch');
+    const goToBtn = this.container.frame.getByRole('button', { name: 'Go to new branch' });
+    await goToBtn.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
+    await goToBtn.click();
+    Logger.success('Click', 'Create Branch', `Navigated to ${config.type}/${config.name}`);
+  }
+
+  // -- Delete Branch --------------------------------------------------
+
+  /** Open Menu and click Delete branch */
+  async deleteBranch(): Promise<void> {
+    Logger.action('Click', 'Menu', 'Opening menu for branch deletion');
+    const menuBtn = this.container.frame.getByRole('button', { name: 'Menu' });
+    await menuBtn.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
+    await menuBtn.click();
+
+    Logger.action('Click', 'Delete Branch', 'Clicking Delete branch');
+    const deleteBtn = this.container.frame.getByRole('button', { name: 'Delete branch', exact: true });
+    await deleteBtn.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
+    await deleteBtn.click();
+    Logger.success('Click', 'Delete Branch', 'Delete branch clicked');
+  }
+
+  /** Confirm deletion in the confirmation dialog */
+  async confirmBranchDeletion(): Promise<void> {
+    Logger.action('Click', 'Delete Branch', 'Confirming deletion');
+    const confirmBtn = this.container.frame.getByRole('button', { name: 'Delete' });
+    await confirmBtn.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
+    await confirmBtn.click();
+    Logger.success('Click', 'Delete Branch', 'Branch deleted');
+  }
+
+  /** Verify the Dashboard is shown after branch deletion */
+  async verifyReturnToDashboard(): Promise<void> {
+    Logger.action('Verify', 'Dashboard', 'Verifying return to Dashboard');
+    await this.container.dashboard.verifyDashboardReady();
+    Logger.success('Verify', 'Dashboard', 'Returned to Dashboard');
+  }
+
+  // -- Local Variables ------------------------------------------------
+
+  /** Open the Local Variables panel via Menu */
+  async openLocalVariables(): Promise<void> {
+    Logger.action('Click', 'Menu', 'Opening menu');
+    const menuBtn = this.container.frame.getByRole('button', { name: 'Menu' });
+    await menuBtn.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
+    await menuBtn.click();
+
+    Logger.action('Click', 'Local Variables', 'Opening Local variables panel');
+    const lvBtn = this.container.frame.getByRole('button', { name: 'Local variables', exact: true });
+    await lvBtn.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
+    await lvBtn.click();
+
+    const lvFrame = this.container.getFrame(IFRAMES.LOCAL_VARIABLES);
+    const lv = new LocalVariablesComponent(lvFrame);
+    await lv.createButton.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
+    Logger.success('Click', 'Local Variables', 'Panel loaded');
+  }
+
+  /** Create a local variable, search for it, and select it */
+  async createAndVerifyLocalVariable(data: LocalVariableData): Promise<void> {
+    await this.openLocalVariables();
+
+    const lvFrame = this.container.getFrame(IFRAMES.LOCAL_VARIABLES);
+    const lv = new LocalVariablesComponent(lvFrame);
+
+    await lv.createVariable(data);
+    await lv.searchVariable(data.name);
+    await lv.selectVariable(data.name);
+  }
+
   // -- Publish --------------------------------------------------------
 
   /** Click the "Generate and publish" button in the container frame */
@@ -113,7 +216,6 @@ export class StudioPage extends BasePage {
   /** Click Confirm inside the publish dialog iframe */
   async confirmPublish(): Promise<void> {
     const publishFrame = this.container.getFrame(IFRAMES.PUBLISH);
-    const { PublishComponent } = await import('../components/PublishComponent');
     const pub = new PublishComponent(publishFrame);
     await pub.confirmButton.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
     await pub.confirmButton.click();
@@ -123,7 +225,6 @@ export class StudioPage extends BasePage {
   /** Verify the success message after publishing */
   async verifyPublicationSuccess(): Promise<void> {
     const publishFrame = this.container.getFrame(IFRAMES.PUBLISH);
-    const { PublishComponent } = await import('../components/PublishComponent');
     const pub = new PublishComponent(publishFrame);
     await pub.successMessage.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
     Logger.success('Verify', 'Publish', 'App successfully published');
@@ -145,7 +246,6 @@ export class StudioPage extends BasePage {
     await this.clickOverviewButton('Screens');
 
     const screensFrame = this.container.getFrame(IFRAMES.SCREENS);
-    const { ScreensComponent } = await import('../components/ScreensComponent');
     const screens = new ScreensComponent(screensFrame);
 
     await screens.searchBox.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
@@ -164,7 +264,6 @@ export class StudioPage extends BasePage {
 
     // Wait for Unnamed iframe content
     const unnamedFrame = this.container.getFrame(IFRAMES.UNNAMED);
-    const { UnnamedComponent } = await import('../components/UnnamedComponent');
     const unnamed = new UnnamedComponent(unnamedFrame);
     const content = unnamed.getContentElement('V00|Contents');
     await content.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
@@ -178,8 +277,7 @@ export class StudioPage extends BasePage {
     await this.clickOverviewButton('App Flow');
 
     const appFlowFrame = this.container.getFrame(IFRAMES.APP_FLOW);
-    const { AppFlowComponent } = await import('../components/AppFlowComponent');
-    const appFlow = new AppFlowComponent(appFlowFrame);
+    const appFlow = new AppFlowComponent(appFlowFrame, this.page);
 
     await appFlow.searchButton.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
     await appFlow.searchButton.click();
@@ -210,6 +308,10 @@ export class StudioPage extends BasePage {
     await processDiagram.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
     await processDiagram.click();
     Logger.success('Click', 'AppFlow', `Process ${processId} found in diagram`);
+
+    // Download diagrams
+    await appFlow.downloadDiagram('JPG');
+    await appFlow.downloadDiagram('PNG');
   }
 
   // -- Dependencies ---------------------------------------------------
@@ -224,13 +326,17 @@ export class StudioPage extends BasePage {
     const depFrame = this.container.frame
       .getByRole('tabpanel', { name: 'Dependencies' })
       .frameLocator(IFRAMES.DEPENDENCIES);
-    const { DependenciesComponent } = await import('../components/DependenciesComponent');
     const deps = new DependenciesComponent(depFrame);
 
-    const globalTxn = deps.getItem('Global transaction logic');
-    await globalTxn.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });
-    await globalTxn.click();
-    Logger.success('Click', 'Dependencies', 'Clicked Global transaction logic');
+    // Expand module and check a dependency
+    await deps.expandModule('MOD_KIREI_MODULES');
+    await deps.checkModuleByIndex(4);
+    await deps.saveDependencies();
+
+    // Revert: expand, uncheck, save
+    await deps.expandModule('MOD_KIREI_MODULES');
+    await deps.uncheckModuleByIndex(4);
+    await deps.saveDependencies();
   }
 
   // -- Processes ------------------------------------------------------
@@ -239,7 +345,6 @@ export class StudioPage extends BasePage {
     await this.clickOverviewButton(' Processes');
 
     const processesFrame = this.container.getFrame(IFRAMES.PROCESSES);
-    const { ProcessesComponent } = await import('../components/ProcessesComponent');
     const processes = new ProcessesComponent(processesFrame);
 
     await processes.searchBox.waitFor({ state: 'visible', timeout: TIMEOUTS.ELEMENT_WAIT });

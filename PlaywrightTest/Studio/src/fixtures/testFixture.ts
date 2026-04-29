@@ -3,7 +3,7 @@ import { LoginPage } from '../pages/LoginPage';
 import { StudioPage } from '../pages/StudioPage';
 import { SettingsPage } from '../pages/SettingsPage';
 import { TransactionsPage } from '../pages/TransactionsPage';
-import { ThemePage } from '../pages/Themepage';
+import { ThemePage } from '../pages/ThemePage';
 import { ModulesPage } from '../pages/ModulesPage';
 import { ScreensPage } from '../pages/ScreensPage';
 import { URLS, CREDENTIALS, APPLICATION } from '../utils/constants';

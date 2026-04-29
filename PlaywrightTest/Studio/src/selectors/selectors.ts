@@ -24,7 +24,9 @@ export const IFRAMES = {
   SETTINGS: 'iframe[title="Settings"]',
   UNNAMED: 'iframe[title="Unnamed"]',
   EDITOR: 'iframe[title="Editor"]',
-  THEMES: 'iframe[title="Themes    xml"]',
+  THEMES: 'iframe[title="Themes"]',
+  CREATE_BRANCH: 'iframe[title="Create branch"]',
+  LOCAL_VARIABLES: 'iframe[title="Local variables"]',
 } as const;
 
 // ── Login Page ──────────────────────────────────────────────────────
@@ -42,4 +44,8 @@ export const STUDIO = {
 // ── Data-testid based (preferred) ───────────────────────────────────
 export const TEST_IDS = {
   SETTING_NAME: 'setting_name',
+  // Create Branch
+  BRANCH_TYPE_DROPDOWN: 'dropdownType',
+  BRANCH_NAME_INPUT: 'textInputBranchName',
+  BRANCH_DESCRIPTION_TEXTAREA: 'textAreaDescription',
 } as const;

@@ -42,6 +42,7 @@ export class DashboardComponent extends BaseComponent {
   }
 
   async searchModule(name: string): Promise<void> {
+    await this.searchBox.waitFor({ state: 'visible', timeout: 15_000 });
     await this.searchBox.click();
     await this.searchBox.fill(name);
     Logger.action('Search', 'Dashboard', `Searching module: ${name}`);
@@ -49,7 +50,14 @@ export class DashboardComponent extends BaseComponent {
 
   async selectModule(name: string): Promise<void> {
     const moduleItem = this.getModuleItem(name);
+    await moduleItem.waitFor({ state: 'visible', timeout: 15_000 });
     await moduleItem.click();
     Logger.success('Click', 'Dashboard', `Selected module: ${name}`);
+  }
+
+  async verifyDashboardReady(): Promise<void> {
+    const welcome = this.frame.getByText("Let's get started");
+    await welcome.waitFor({ state: 'visible', timeout: 60_000 });
+    Logger.success('Verify', 'Dashboard', 'Dashboard ready');
   }
 }
